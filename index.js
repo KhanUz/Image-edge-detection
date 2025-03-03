@@ -150,11 +150,6 @@ function grayscale(pixels) {
     return pixels;
 }
 
-
-
-
-
-
-function edgeDetection(pixels , convolutionX, convolutionY, width, height) {
-    
+function edgeDetection(pixels, convolutionX, convolutionY, width, height) {
+    console.log(pixels);
 }
