@@ -140,6 +140,7 @@ function blur(pixels, convolution, width, height) {
         }
     }
     return newPixels;
+    console.log("Hello");
 }
 
 function grayscale(pixels) {
