@@ -32,12 +32,17 @@ function processImage() {
     const height = origCanvas.height;
 
     let pixels = contextOrigCanvas.getImageData(0, 0, width, height).data;
-    let convolution = [
-        [-1, 0, 1],
-        [-2, 0, 2],
-        [-1, 0, 1],
-    ];
-    let blurred = blur(pixels, convolution, width, height);
+
+    let blurred = blur(
+        pixels,
+        [
+            [1, 1, 1],
+            [1, 1, 1],
+            [1, 1, 1],
+        ],
+        width,
+        height
+    );
 
     const newImg = new ImageData(blurred, width, height);
     console.log(newImg);
