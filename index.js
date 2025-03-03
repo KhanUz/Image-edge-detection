@@ -156,5 +156,5 @@ function grayscale(pixels) {
 }
 
 function edgeDetection(pixels, convolutionX, convolutionY, width, height) {
-    console.log("htsi is a new code to work on");
+    console.log("WWWWWWWWWWWWWWWWWWWWWWWOoooooooooWWWWWWWW");
 }
