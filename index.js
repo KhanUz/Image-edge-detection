@@ -157,5 +157,5 @@ function grayscale(pixels) {
 }
 
 function edgeDetection(pixels, convolutionX, convolutionY, width, height) {
-    console.log(pixels);
+    console.log("WWWWWWWWWWWWWWWWWWWWWWWOoooooooooWWWWWWWW");
 }
