@@ -140,7 +140,6 @@ function blur(pixels, convolution, width, height) {
         }
     }
     return newPixels;
-    console.log("Hello");
 }
 
 function grayscale(pixels) {
@@ -156,6 +155,4 @@ function grayscale(pixels) {
     return pixels;
 }
 
-function edgeDetection(pixels, convolutionX, convolutionY, width, height) {
-    console.log("w");
-}
+function edgeDetection(pixels, convolutionX, convolutionY, width, height) {}
