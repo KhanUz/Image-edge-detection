@@ -33,18 +33,34 @@ function processImage() {
 
     let pixels = contextOrigCanvas.getImageData(0, 0, width, height).data;
 
-    let blurred = blur(
+    // let blurred = blur(
+    //     pixels,
+    //     [
+    //         [1, 1, 1],
+    //         [1, 1, 1],
+    //         [1, 1, 1],
+    //     ],
+    //     width,
+    //     height
+    // );
+
+    let edgeDetected = edgeDetection(
         pixels,
         [
-            [1, 1, 1],
-            [1, 1, 1],
-            [1, 1, 1],
+            [-1, 0, 1],
+            [-2, 0, 2],
+            [-1, 0, 1],
+        ],
+        [
+            [1, 2, 1],
+            [0, 0, 0],
+            [-1, -2, -1],
         ],
         width,
         height
     );
-
-    const newImg = new ImageData(blurred, width, height);
+    const newImg = new ImageData(edgeDetected, width, height);
+    console.log(newImg);
     console.log(newImg);
 
     contextOutputCanvas.putImageData(newImg, 0, 0);
@@ -155,4 +171,79 @@ function grayscale(pixels) {
     return pixels;
 }
 
-function edgeDetection(pixels, convolutionX, convolutionY, width, height) {}
+function edgeDetection(pixels, convolutionX, convolutionY, width, height) {
+    let newPixels = new Uint8ClampedArray(width * height * 4);
+    let p0, p1, p2, p3, p4, p5, p6, p7, p8;
+    for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+            // hardCoding is better for fixed size :)
+            let tl =
+                (width * ((y - 1 + height) % height) +
+                    ((x - 1 + width) % width)) *
+                4;
+            let tc =
+                (width * ((y - 1 + height) % height) + ((x + width) % width)) *
+                4;
+            let tr =
+                (width * ((y - 1 + height) % height) +
+                    ((x + 1 + width) % width)) *
+                4;
+            let ml =
+                (width * ((y + height) % height) + ((x - 1 + width) % width)) *
+                4;
+            let mc =
+                (width * ((y + height) % height) + ((x + width) % width)) * 4;
+            let mr =
+                (width * ((y + height) % height) + ((x + 1 + width) % width)) *
+                4;
+            let bl =
+                (width * ((y + 1 + height) % height) +
+                    ((x - 1 + width) % width)) *
+                4;
+            let bc =
+                (width * ((y + 1 + height) % height) + ((x + width) % width)) *
+                4;
+            let br =
+                (width * ((y + 1 + height) % height) +
+                    ((x + 1 + width) % width)) *
+                4;
+
+            p0 = pixels[tl] * convolutionX[0][0];
+            p1 = pixels[tc] * convolutionX[0][1];
+            p2 = pixels[tr] * convolutionX[0][2];
+            p3 = pixels[ml] * convolutionX[1][0];
+            p4 = pixels[mc] * convolutionX[1][1];
+            p5 = pixels[mr] * convolutionX[1][2];
+            p6 = pixels[bl] * convolutionX[2][0];
+            p7 = pixels[bc] * convolutionX[2][1];
+            p8 = pixels[br] * convolutionX[2][2];
+            let changeX = p0 + p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8;
+
+            p0 = pixels[tl] * convolutionY[0][0];
+            p1 = pixels[tc] * convolutionY[0][1];
+            p2 = pixels[tr] * convolutionY[0][2];
+            p3 = pixels[ml] * convolutionY[1][0];
+            p4 = pixels[mc] * convolutionY[1][1];
+            p5 = pixels[mr] * convolutionY[1][2];
+            p6 = pixels[bl] * convolutionY[2][0];
+            p7 = pixels[bc] * convolutionY[2][1];
+            p8 = pixels[br] * convolutionY[2][2];
+            let changeY = p0 + p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8;
+
+            let overall = map(
+                Math.sqrt(changeX * changeX + changeY * changeY),
+                0,
+                1414,
+                0,
+                255
+            );
+            newPixels[mc] = overall;
+            newPixels[mc + 1] = overall;
+            newPixels[mc + 2] = overall;
+            newPixels[mc + 3] = pixels[mc + 3];
+        }
+    }
+    return newPixels;
+}
+const map = (value, x1, y1, x2, y2) =>
+    ((value - x1) * (y2 - x2)) / (y1 - x1) + x2;
