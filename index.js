@@ -230,17 +230,23 @@ function edgeDetection(pixels, convolutionX, convolutionY, width, height) {
             p8 = pixels[br] * convolutionY[2][2];
             let changeY = p0 + p1 + p2 + p3 + p4 + p5 + p6 + p7 + p8;
 
-            let overall = map(
+            let magnitude = map(
                 Math.sqrt(changeX * changeX + changeY * changeY),
                 0,
                 1414,
                 0,
                 255
             );
-            newPixels[mc] = overall;
-            newPixels[mc + 1] = overall;
-            newPixels[mc + 2] = overall;
-            newPixels[mc + 3] = pixels[mc + 3];
+            let angle = Math.atan2(changeY, changeX);
+            // Convert angle into RGB smoothly using cosine shifts
+            newPixels[mc] = (Math.cos(angle) * magnitude + magnitude) / 2; // Red
+            newPixels[mc + 1] =
+                (Math.cos(angle + (2 / 3) * Math.PI) * magnitude + magnitude) /
+                2; // Green
+            newPixels[mc + 2] =
+                (Math.cos(angle + (4 / 3) * Math.PI) * magnitude + magnitude) /
+                2; // Blue
+            newPixels[mc + 3] = pixels[mc + 3]; // Preserve alpha channel
         }
     }
     return newPixels;
