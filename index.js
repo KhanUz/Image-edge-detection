@@ -3,10 +3,70 @@ const contextOrigCanvas = origCanvas.getContext("2d");
 const outputCanvas = document.getElementById("edge-detect-canvas");
 const contextOutputCanvas = outputCanvas.getContext("2d");
 const uploadImg = document.getElementById("ImageFile");
-
+const uploadVideo = document.getElementById("VideoFile");
+const videoEl = document.createElement("video");
+contextOrigCanvas.imageSmoothingEnabled = true;
+uploadVideo.addEventListener("change", (e) => {
+    handleVideoUpload(e.target.files[0]);
+});
 uploadImg.addEventListener("change", (e) => {
     handleImageUpload(e.target.files[0]);
 });
+
+function handleVideoUpload(file) {
+    if (!file) {
+        return;
+    }
+
+    if (videoEl.src) {
+        URL.revokeObjectURL(videoEl.src);
+    }
+
+    const url = URL.createObjectURL(file);
+    videoEl.src = url;
+    videoEl.onloadeddata = function () {
+        videoEl.play();
+        processVideo();
+    };
+}
+
+function processVideo() {
+    const scale = 2;
+    const height =
+        (origCanvas.height =
+        outputCanvas.height =
+            videoEl.videoHeight / scale);
+    const width =
+        (origCanvas.width =
+        outputCanvas.width =
+            videoEl.videoWidth / scale);
+
+    contextOrigCanvas.drawImage(videoEl, 0, 0, width, height);
+    let imgData = contextOrigCanvas.getImageData(0, 0, width, height);
+
+    let pixels = imgData.data;
+    let edgeDetected = edgeDetection(
+        pixels,
+        [
+            [-1, 0, 1],
+            [-2, 0, 2],
+            [-1, 0, 1],
+        ],
+        [
+            [-1, -2, -1],
+            [0, 0, 0],
+            [1, 2, 1],
+        ],
+        width,
+        height
+    );
+    let newImg = new ImageData(edgeDetected, width, height);
+    contextOutputCanvas.putImageData(newImg, 0, 0);
+
+    setTimeout(() => {
+        processVideo();
+    }, 1000 / 60);
+}
 
 function handleImageUpload(file) {
     if (!file) return;
@@ -32,17 +92,6 @@ function processImage() {
     const height = origCanvas.height;
 
     let pixels = contextOrigCanvas.getImageData(0, 0, width, height).data;
-
-    // let blurred = blur(
-    //     pixels,
-    //     [
-    //         [1, 1, 1],
-    //         [1, 1, 1],
-    //         [1, 1, 1],
-    //     ],
-    //     width,
-    //     height
-    // );
 
     let edgeDetected = edgeDetection(
         pixels,
@@ -238,14 +287,13 @@ function edgeDetection(pixels, convolutionX, convolutionY, width, height) {
                 255
             );
             let angle = Math.atan2(changeY, changeX);
-            // Convert angle into RGB smoothly using cosine shifts
-            newPixels[mc] = (Math.cos(angle) * magnitude + magnitude) / 2; // Red
+            newPixels[mc] = (Math.cos(angle) * magnitude + magnitude) / 2;
             newPixels[mc + 1] =
                 (Math.cos(angle + (2 / 3) * Math.PI) * magnitude + magnitude) /
-                2; // Green
+                2;
             newPixels[mc + 2] =
                 (Math.cos(angle + (4 / 3) * Math.PI) * magnitude + magnitude) /
-                2; // Blue
+                2;
             newPixels[mc + 3] = pixels[mc + 3]; // Preserve alpha channel
         }
     }
