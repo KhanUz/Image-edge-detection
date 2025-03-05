@@ -12,15 +12,16 @@
 
 <body data-bs-theme="dark" class="bg-dark">
 
-    <div class="inputs position-absolute bottom-0 start-0 m-3">
+    <div class="inputs position-fixed bottom-0 start-0 m-3">
         <label for="ImageFile" class="btn btn-outline-primary">
             <i class="bi bi-card-image"></i>
             <input type="file" name="ImageFile" id="ImageFile" accept="image/*" hidden>
         </label>
         <label for="VideoFile" class="btn btn-outline-primary">
-            <i class="bi bi-card-video"></i>
+            <i class="bi bi-file-earmark-play-fill"></i>
             <input type="file" name="VideoFile" id="VideoFile" accept="video/*" hidden>
         </label>
+        <button class="btn btn-outline-primary" id="WebCam"><i class="bi bi-webcam-fill"></i></button>
     </div>
     <div class="canvases d-flex gap-1  m-3">
         <canvas id="original-image-canvas" class="bg-info col-6"></canvas>

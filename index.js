@@ -5,7 +5,25 @@ const contextOutputCanvas = outputCanvas.getContext("2d");
 const uploadImg = document.getElementById("ImageFile");
 const uploadVideo = document.getElementById("VideoFile");
 const videoEl = document.createElement("video");
+const webcam = document.getElementById("WebCam");
+const scale = 1;
+webcam.addEventListener("click", async () => {
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+            video: true,
+        });
+        videoEl.srcObject = stream;
+        videoEl.onloadeddata = function () {
+            videoEl.play();
+            processVideo();
+        };
+    } catch (error) {
+        console.log(error);
+    }
+});
+
 contextOrigCanvas.imageSmoothingEnabled = true;
+
 uploadVideo.addEventListener("change", (e) => {
     handleVideoUpload(e.target.files[0]);
 });
@@ -26,12 +44,18 @@ function handleVideoUpload(file) {
     videoEl.src = url;
     videoEl.onloadeddata = function () {
         videoEl.play();
+        origCanvas.style.height = outputCanvas.style.height =
+            (videoEl.videoHeight * origCanvas.offsetWidth) /
+                videoEl.videoWidth +
+            "px";
+
+        origCanvas.width = outputCanvas.width = videoEl.videoWidth;
+        origCanvas.height = outputCanvas.height = videoEl.videoHeight;
         processVideo();
     };
 }
 
 function processVideo() {
-    const scale = 2;
     const height =
         (origCanvas.height =
         outputCanvas.height =
@@ -70,13 +94,21 @@ function processVideo() {
 
 function handleImageUpload(file) {
     if (!file) return;
-
+    outputCanvas.style.height = origCanvas.style.height =
+        (videoEl.videoHeight * (origCanvas.offsetWidth / videoEl.videoWidth)) /
+            scale +
+        "px";
+    outputCanvas.style.width = origCanvas.style.width =
+        (videoEl.videoHeight * (origCanvas.offsetWidth / videoEl.videoWidth)) /
+        scale;
+    +"px";
     const reader = new FileReader();
     reader.onload = function () {
         const img = new Image();
         img.onload = function () {
             origCanvas.style.height = outputCanvas.style.height =
                 (img.height * origCanvas.offsetWidth) / img.width + "px";
+
             origCanvas.width = outputCanvas.width = img.width;
             origCanvas.height = outputCanvas.height = img.height;
             contextOrigCanvas.drawImage(img, 0, 0);
@@ -286,7 +318,8 @@ function edgeDetection(pixels, convolutionX, convolutionY, width, height) {
                 0,
                 255
             );
-            let angle = Math.atan2(changeY, changeX);
+            let angle = Math.atan2(changeY, changeX); // [-pi , pi]
+
             newPixels[mc] = (Math.cos(angle) * magnitude + magnitude) / 2;
             newPixels[mc + 1] =
                 (Math.cos(angle + (2 / 3) * Math.PI) * magnitude + magnitude) /
@@ -299,5 +332,5 @@ function edgeDetection(pixels, convolutionX, convolutionY, width, height) {
     }
     return newPixels;
 }
-const map = (value, x1, y1, x2, y2) =>
-    ((value - x1) * (y2 - x2)) / (y1 - x1) + x2;
+const map = (value, inX, inY, outX, outY) =>
+    ((value - inX) * (outY - outX)) / (inY - inX) + outX;
